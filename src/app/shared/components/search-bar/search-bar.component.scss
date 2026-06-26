@@ -1,0 +1,17 @@
+:host {
+  display: block;
+}
+
+.search-field {
+  width: 100%;
+
+  .search-prefix-icon {
+    color: var(--color-muted);
+    margin-right: 4px;
+  }
+
+  // Remove the subscript (hint/error) space so it sits flush
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}

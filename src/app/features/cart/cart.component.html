@@ -1,0 +1,125 @@
+<div class="page-content">
+  <div class="container">
+    <h1 class="cart-title">Shopping Cart</h1>
+
+    @if (cartItems().length > 0) {
+      <div class="cart-layout">
+
+        <!-- Items list -->
+        <section class="cart-items" aria-label="Cart items">
+          @for (item of cartItems(); track item.book.id) {
+            <div class="cart-item">
+              <a [routerLink]="['/books', item.book.id]" class="cart-item__img-wrap">
+                <img
+                  [src]="item.book.coverImage"
+                  [alt]="item.book.title + ' cover'"
+                  class="cart-item__img"
+                />
+              </a>
+              <div class="cart-item__info">
+                <a [routerLink]="['/books', item.book.id]" class="cart-item__title">
+                  {{ item.book.title }}
+                </a>
+                <p class="cart-item__author">{{ item.book.author }}</p>
+                <p class="cart-item__price-unit">\${{ item.book.price.toFixed(2) }} each</p>
+
+                <div class="cart-item__controls">
+                  <!-- Quantity controls -->
+                  <div class="qty-control">
+                    <button
+                      type="button"
+                      class="qty-btn"
+                      (click)="decrement(item)"
+                      [attr.aria-label]="'Decrease quantity of ' + item.book.title"
+                    >
+                      <mat-icon>remove</mat-icon>
+                    </button>
+                    <span class="qty-value" [attr.aria-label]="'Quantity: ' + item.quantity">
+                      {{ item.quantity }}
+                    </span>
+                    <button
+                      type="button"
+                      class="qty-btn"
+                      (click)="increment(item)"
+                      [attr.aria-label]="'Increase quantity of ' + item.book.title"
+                    >
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  </div>
+
+                  <!-- Line total -->
+                  <span class="cart-item__line-total">
+                    \${{ (item.book.price * item.quantity).toFixed(2) }}
+                  </span>
+
+                  <!-- Remove -->
+                  <button
+                    mat-icon-button
+                    class="remove-btn"
+                    (click)="remove(item)"
+                    [attr.aria-label]="'Remove ' + item.book.title + ' from cart'"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <mat-divider />
+          }
+        </section>
+
+        <!-- Order summary -->
+        <aside class="cart-summary" aria-label="Order summary">
+          <h2 class="summary-title">Order Summary</h2>
+
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>\${{ totalPrice().toFixed(2) }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span>
+              @if (shippingCost() === 0) {
+                <span class="free-shipping">FREE</span>
+              } @else {
+                \${{ shippingCost().toFixed(2) }}
+              }
+            </span>
+          </div>
+          @if (shippingCost() > 0) {
+            <p class="shipping-hint">
+              Add \${{ (50 - totalPrice()).toFixed(2) }} more for free shipping
+            </p>
+          }
+
+          <mat-divider class="summary-divider" />
+
+          <div class="summary-row summary-total">
+            <span>Total</span>
+            <span>\${{ grandTotal().toFixed(2) }}</span>
+          </div>
+
+          <a routerLink="/checkout" mat-flat-button color="primary" class="checkout-btn">
+            Proceed to Checkout
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+
+          <a routerLink="/books" mat-stroked-button class="continue-btn">
+            Continue Shopping
+          </a>
+        </aside>
+
+      </div>
+
+    } @else {
+      <!-- Empty cart state -->
+      <div class="empty-cart">
+        <mat-icon class="empty-cart__icon">shopping_cart</mat-icon>
+        <h2>Your cart is empty</h2>
+        <p>Browse our collection and add some books!</p>
+        <a routerLink="/books" mat-flat-button color="primary">Browse Books</a>
+      </div>
+    }
+  </div>
+</div>

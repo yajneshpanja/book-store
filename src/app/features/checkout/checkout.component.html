@@ -1,0 +1,103 @@
+<div class="page-content">
+  <div class="container">
+
+    @if (cartItems().length > 0) {
+
+      <div class="checkout-layout">
+        <mat-card class="checkout-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon class="checkout-icon">shopping_bag</mat-icon>
+              Order Review
+            </mat-card-title>
+            <mat-card-subtitle>
+              {{ itemCount() }} item{{ itemCount() === 1 ? '' : 's' }}
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Item list -->
+            <div class="checkout-items">
+              @for (item of cartItems(); track item.book.id) {
+                <div class="checkout-item">
+                  <img
+                    [src]="item.book.coverImage"
+                    [alt]="item.book.title + ' cover'"
+                    class="checkout-item__img"
+                  />
+                  <div class="checkout-item__info">
+                    <span class="checkout-item__title">{{ item.book.title }}</span>
+                    <span class="checkout-item__author">{{ item.book.author }}</span>
+                  </div>
+                  <div class="checkout-item__qty">×{{ item.quantity }}</div>
+                  <div class="checkout-item__price">
+                    \${{ (item.book.price * item.quantity).toFixed(2) }}
+                  </div>
+                </div>
+              }
+            </div>
+
+            <mat-divider class="checkout-divider" />
+
+            <!-- Totals -->
+            <div class="checkout-totals">
+              <div class="total-row">
+                <span>Subtotal</span>
+                <span>\${{ totalPrice().toFixed(2) }}</span>
+              </div>
+              <div class="total-row">
+                <span>Shipping</span>
+                <span>
+                  @if (shippingCost() === 0) {
+                    <span class="free-tag">FREE</span>
+                  } @else {
+                    \${{ shippingCost().toFixed(2) }}
+                  }
+                </span>
+              </div>
+
+              <mat-divider class="checkout-divider" />
+
+              <div class="total-row grand-total">
+                <span>Total</span>
+                <span>\${{ grandTotal().toFixed(2) }}</span>
+              </div>
+            </div>
+
+            <!-- Notice -->
+            <p class="checkout-notice">
+              <mat-icon class="notice-icon">info</mat-icon>
+              This is a demo. No real payment will be processed.
+            </p>
+          </mat-card-content>
+
+          <mat-card-actions class="checkout-actions">
+            <button
+              mat-flat-button
+              color="primary"
+              class="place-order-btn"
+              (click)="placeOrder()"
+            >
+              <mat-icon>check_circle</mat-icon>
+              Place Order
+            </button>
+            <a routerLink="/cart" mat-stroked-button class="back-btn">
+              <mat-icon>arrow_back</mat-icon>
+              Back to Cart
+            </a>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+
+    } @else {
+      <!-- Empty cart redirect hint -->
+      <div class="empty-state">
+        <mat-icon class="empty-icon">shopping_cart</mat-icon>
+        <h2>Nothing to check out</h2>
+        <p>Add some books to your cart first.</p>
+        <a routerLink="/books" mat-flat-button color="primary">Browse Books</a>
+      </div>
+    }
+
+  </div>
+</div>

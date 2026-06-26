@@ -1,0 +1,20 @@
+<mat-form-field appearance="outline" class="search-field">
+  <mat-icon matPrefix class="search-prefix-icon">search</mat-icon>
+  <input
+    matInput
+    [formControl]="searchControl"
+    [placeholder]="placeholder"
+    (keyup.enter)="onSearchClick()"
+    aria-label="Search books"
+  />
+  @if (searchControl.value) {
+    <button
+      mat-icon-button
+      matSuffix
+      (click)="clearSearch()"
+      aria-label="Clear search"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</mat-form-field>

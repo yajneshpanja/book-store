@@ -1,0 +1,78 @@
+$mobile: 599px;
+$tablet: 1023px;
+$laptop: 1439px;
+
+// ── Page header ───────────────────────────────────────────────────────────────
+.books-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.books-title {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+
+  .books-count {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--color-muted);
+    margin-left: 8px;
+  }
+}
+
+// ── Toolbar (search + filter) ─────────────────────────────────────────────────
+.books-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+// ── Books grid ────────────────────────────────────────────────────────────────
+.books-grid {
+  display: grid;
+  gap: var(--spacing-lg);
+
+  // Mobile: 1 column
+  grid-template-columns: 1fr;
+
+  // Tablet: 2 columns
+  @media (min-width: #{$mobile + 1}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  // Laptop: 3 columns
+  @media (min-width: #{$tablet + 1}) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  // Desktop: 4 columns
+  @media (min-width: #{$laptop + 1}) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-3xl) 0;
+
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  &__subtitle {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+  }
+}
+
+// ── Paginator ─────────────────────────────────────────────────────────────────
+mat-paginator {
+  margin-top: var(--spacing-xl);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}

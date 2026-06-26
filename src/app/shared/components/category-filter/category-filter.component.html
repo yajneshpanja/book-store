@@ -1,0 +1,24 @@
+<div class="filter-wrap">
+  <!-- "All" chip -->
+  <button
+    class="filter-chip"
+    [class.filter-chip--active]="selected === ''"
+    (click)="select('')"
+    aria-label="Show all categories"
+  >
+    All
+  </button>
+
+  @for (cat of categories; track cat) {
+    <button
+      class="filter-chip"
+      [class.filter-chip--active]="selected === cat"
+      (click)="select(cat)"
+      [attr.aria-label]="'Filter by ' + cat"
+      [attr.aria-pressed]="selected === cat"
+    >
+      <mat-icon class="chip-icon">{{ categoryIcons[cat] }}</mat-icon>
+      {{ cat }}
+    </button>
+  }
+</div>

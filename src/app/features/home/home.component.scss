@@ -1,0 +1,142 @@
+$mobile: 599px;
+$tablet: 1023px;
+$laptop: 1439px;
+
+// ── Search strip ──────────────────────────────────────────────────────────────
+.home-search {
+  background: var(--color-surface);
+  padding: var(--spacing-xl) 0;
+
+  app-search-bar {
+    max-width: 640px;
+    margin: 0 auto;
+    display: block;
+  }
+}
+
+// ── Sections ──────────────────────────────────────────────────────────────────
+.section {
+  padding: var(--spacing-3xl) 0;
+
+  &--surface {
+    background: var(--color-surface);
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.section-title {
+  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.see-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+// ── Books grid ────────────────────────────────────────────────────────────────
+.books-grid {
+  display: grid;
+  gap: var(--spacing-lg);
+
+  // Mobile: 1 column
+  grid-template-columns: 1fr;
+
+  // Tablet: 2 columns
+  @media (min-width: #{$mobile + 1}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  // Laptop: 3 columns
+  @media (min-width: #{$tablet + 1}) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  // Desktop: 4 columns (featured = 6 books → 3+3 or 4+2 depending on count)
+  @media (min-width: #{$laptop + 1}) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// ── Category cards grid ───────────────────────────────────────────────────────
+.categories-grid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (min-width: #{$mobile + 1}) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (min-width: #{$tablet + 1}) {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg) var(--spacing-md);
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: box-shadow var(--transition-base),
+              transform var(--transition-base),
+              border-color var(--transition-base);
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+    border-color: var(--color-primary);
+  }
+
+  &__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 1.6rem;
+      width: 1.6rem;
+      height: 1.6rem;
+    }
+  }
+
+  &__label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  &__arrow {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-muted);
+    display: none;
+
+    @media (min-width: #{$tablet + 1}) {
+      display: block;
+    }
+  }
+}

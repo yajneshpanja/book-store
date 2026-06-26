@@ -1,0 +1,135 @@
+$mobile: 599px;
+
+:host {
+  display: block;
+}
+
+// ── Card container ────────────────────────────────────────────────────────────
+.book-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  cursor: pointer;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-sm) !important;
+  overflow: hidden;
+  transition: transform var(--transition-base),
+              box-shadow var(--transition-base);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg) !important;
+  }
+}
+
+// ── Cover image ───────────────────────────────────────────────────────────────
+.book-card__cover {
+  position: relative;
+  overflow: hidden;
+  height: 220px;
+
+  @media (max-width: #{$mobile}) {
+    height: 180px;
+  }
+}
+
+.book-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+
+  .book-card:hover & {
+    transform: scale(1.04);
+  }
+}
+
+.book-card__category-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(4px);
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────────
+.book-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--spacing-md) !important;
+  gap: var(--spacing-xs);
+}
+
+.book-card__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--color-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.book-card__author {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  margin-top: 2px;
+}
+
+// ── Star rating ───────────────────────────────────────────────────────────────
+.book-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  margin: 4px 0;
+
+  .star-icon {
+    font-size: 0.95rem;
+    width: 0.95rem;
+    height: 0.95rem;
+    color: #f59e0b;
+  }
+
+  .rating-value {
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    margin-left: 4px;
+  }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+.book-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: var(--spacing-sm);
+}
+
+.book-card__price {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.add-btn {
+  font-size: 0.8rem;
+  padding: 0 10px;
+  height: 32px;
+  min-width: unset;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    margin-right: 4px;
+  }
+}

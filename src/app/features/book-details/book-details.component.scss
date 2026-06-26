@@ -1,0 +1,232 @@
+$mobile: 599px;
+$tablet: 1023px;
+
+// ── Breadcrumb ────────────────────────────────────────────────────────────────
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: var(--spacing-xl);
+  font-size: 0.875rem;
+  color: var(--color-muted);
+
+  .breadcrumb-link {
+    color: var(--color-primary);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .breadcrumb-sep {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+// ── Main two-column layout ────────────────────────────────────────────────────
+.detail-layout {
+  display: grid;
+  gap: var(--spacing-3xl);
+  align-items: start;
+
+  // Desktop: image | info side-by-side
+  grid-template-columns: 300px 1fr;
+
+  @media (max-width: #{$tablet}) {
+    grid-template-columns: 240px 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  // Mobile: stacked
+  @media (max-width: #{$mobile}) {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+}
+
+// ── Cover image ───────────────────────────────────────────────────────────────
+.detail-cover {
+  position: sticky;
+  top: calc(var(--navbar-height) + 24px);
+
+  @media (max-width: #{$mobile}) {
+    position: static;
+  }
+
+  &__img {
+    width: 100%;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+  }
+}
+
+// ── Info panel ────────────────────────────────────────────────────────────────
+.detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.detail-category-chip {
+  // chip sits at top
+}
+
+.detail-title {
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.detail-author {
+  font-size: 1rem;
+  color: var(--color-muted);
+  margin-top: -8px;
+}
+
+// ── Rating ────────────────────────────────────────────────────────────────────
+.detail-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  .star-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: #f59e0b;
+  }
+
+  .rating-num {
+    margin-left: 8px;
+    font-size: 0.875rem;
+    color: var(--color-muted);
+  }
+}
+
+// ── Price ─────────────────────────────────────────────────────────────────────
+.detail-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+// ── Description ───────────────────────────────────────────────────────────────
+.detail-desc {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-muted);
+  max-width: 600px;
+}
+
+// ── Meta list ─────────────────────────────────────────────────────────────────
+.detail-meta {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: var(--spacing-md);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+
+    .meta-label {
+      color: var(--color-muted);
+      font-weight: 500;
+    }
+  }
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+.detail-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-sm);
+
+  @media (max-width: #{$mobile}) {
+    flex-direction: column;
+  }
+}
+
+.add-cart-btn {
+  min-width: 160px;
+  height: 44px;
+  font-size: 0.95rem;
+  font-weight: 600;
+
+  mat-icon {
+    margin-right: 6px;
+  }
+}
+
+.back-btn {
+  height: 44px;
+
+  mat-icon {
+    margin-right: 6px;
+  }
+}
+
+// ── Related books ─────────────────────────────────────────────────────────────
+.related-section {
+  margin-top: var(--spacing-3xl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-border);
+}
+
+.related-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-xl);
+}
+
+.related-grid {
+  display: grid;
+  gap: var(--spacing-lg);
+  grid-template-columns: 1fr;
+
+  @media (min-width: #{$mobile + 1}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: #{$tablet + 1}) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// ── Not found ─────────────────────────────────────────────────────────────────
+.not-found {
+  text-align: center;
+  padding: var(--spacing-3xl) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+
+  &__icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: var(--color-border);
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  p {
+    color: var(--color-muted);
+  }
+}

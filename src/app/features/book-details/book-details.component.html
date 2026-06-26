@@ -1,0 +1,101 @@
+<div class="page-content">
+  <div class="container">
+
+    @if (book(); as b) {
+
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a routerLink="/books" class="breadcrumb-link">Books</a>
+        <mat-icon class="breadcrumb-sep">chevron_right</mat-icon>
+        <span>{{ b.title }}</span>
+      </nav>
+
+      <!-- Main detail layout -->
+      <div class="detail-layout">
+
+        <!-- Cover -->
+        <div class="detail-cover">
+          <img
+            [src]="b.coverImage"
+            [alt]="b.title + ' cover'"
+            class="detail-cover__img"
+          />
+        </div>
+
+        <!-- Info -->
+        <div class="detail-info">
+          <mat-chip-set class="detail-category-chip">
+            <mat-chip highlighted color="primary">{{ b.category }}</mat-chip>
+          </mat-chip-set>
+
+          <h1 class="detail-title">{{ b.title }}</h1>
+          <p class="detail-author">by {{ b.author }}</p>
+
+          <!-- Rating -->
+          <div class="detail-rating" [attr.aria-label]="b.rating + ' out of 5 stars'">
+            @for (icon of starIcons; track $index) {
+              <mat-icon class="star-icon">{{ icon }}</mat-icon>
+            }
+            <span class="rating-num">{{ b.rating }} / 5</span>
+          </div>
+
+          <!-- Price -->
+          <div class="detail-price">\${{ b.price.toFixed(2) }}</div>
+
+          <!-- Description -->
+          <p class="detail-desc">{{ b.description }}</p>
+
+          <!-- Meta -->
+          <ul class="detail-meta">
+            <li><span class="meta-label">Pages</span><span>{{ b.pages }}</span></li>
+            <li><span class="meta-label">Publisher</span><span>{{ b.publisher }}</span></li>
+            <li>
+              <span class="meta-label">Published</span>
+              <span>{{ b.publishedDate | slice:0:10 }}</span>
+            </li>
+          </ul>
+
+          <!-- Actions -->
+          <div class="detail-actions">
+            <button
+              mat-flat-button
+              color="primary"
+              class="add-cart-btn"
+              (click)="addToCart()"
+              aria-label="Add to cart"
+            >
+              <mat-icon>add_shopping_cart</mat-icon>
+              Add to Cart
+            </button>
+            <a routerLink="/books" mat-stroked-button class="back-btn">
+              <mat-icon>arrow_back</mat-icon>
+              Back to Books
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Related books -->
+      @if (relatedBooks().length > 0) {
+        <section class="related-section">
+          <h2 class="related-title">More in {{ b.category }}</h2>
+          <div class="related-grid">
+            @for (rb of relatedBooks(); track rb.id) {
+              <app-book-card [book]="rb" (addToCart)="onRelatedAddToCart($event)" />
+            }
+          </div>
+        </section>
+      }
+
+    } @else {
+      <!-- Not found -->
+      <div class="not-found">
+        <mat-icon class="not-found__icon">menu_book</mat-icon>
+        <h2>Book not found</h2>
+        <p>The book you're looking for doesn't exist.</p>
+        <a routerLink="/books" mat-flat-button color="primary">Browse Books</a>
+      </div>
+    }
+
+  </div>
+</div>

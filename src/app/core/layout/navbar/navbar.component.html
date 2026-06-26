@@ -1,0 +1,90 @@
+<mat-sidenav-container class="navbar-sidenav-container">
+  <!-- Mobile Drawer -->
+  <mat-sidenav #drawer mode="over" position="start" class="mobile-drawer">
+    <div class="drawer-header">
+      <span class="drawer-logo">📚 Bookstore</span>
+      <button mat-icon-button (click)="drawer.close()" aria-label="Close menu">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <nav class="drawer-nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+         class="drawer-link">
+        <mat-icon>home</mat-icon>
+        Home
+      </a>
+      <a routerLink="/books" routerLinkActive="active" class="drawer-link">
+        <mat-icon>menu_book</mat-icon>
+        Books
+      </a>
+      <a routerLink="/cart" routerLinkActive="active" class="drawer-link">
+        <mat-icon>shopping_cart</mat-icon>
+        Cart
+        @if (cartCount() > 0) {
+          <span class="drawer-badge">{{ cartCount() }}</span>
+        }
+      </a>
+    </nav>
+  </mat-sidenav>
+
+  <!-- Main content (required by mat-sidenav-container) -->
+  <mat-sidenav-content>
+    <mat-toolbar class="navbar" color="primary">
+      <!-- Hamburger (mobile only) -->
+      <button
+        mat-icon-button
+        class="hamburger"
+        (click)="drawer.open()"
+        aria-label="Open navigation menu"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <!-- Logo -->
+      <a routerLink="/" class="navbar-logo">
+        <mat-icon class="logo-icon">menu_book</mat-icon>
+        <span class="logo-text">Bookstore</span>
+      </a>
+
+      <span class="navbar-spacer"></span>
+
+      <!-- Desktop nav links -->
+      <nav class="desktop-nav">
+        <a routerLink="/" routerLinkActive="active-link"
+           [routerLinkActiveOptions]="{ exact: true }"
+           class="nav-link">Home</a>
+        <a routerLink="/books" routerLinkActive="active-link" class="nav-link">Books</a>
+      </nav>
+
+      <!-- Desktop search -->
+      <div class="navbar-search desktop-only">
+        <mat-form-field appearance="outline" class="search-field">
+          <input
+            matInput
+            [(ngModel)]="searchQuery"
+            placeholder="Search books…"
+            (keyup.enter)="onSearch()"
+            aria-label="Search books"
+          />
+          <button mat-icon-button matSuffix (click)="onSearch()" aria-label="Submit search">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+
+      <!-- Cart icon -->
+      <a
+        routerLink="/cart"
+        mat-icon-button
+        class="cart-btn"
+        aria-label="Shopping cart"
+      >
+        <mat-icon
+          [matBadge]="cartCount() > 0 ? cartCount() : null"
+          matBadgeColor="accent"
+          matBadgeSize="small"
+        >shopping_cart</mat-icon>
+      </a>
+    </mat-toolbar>
+  </mat-sidenav-content>
+</mat-sidenav-container>

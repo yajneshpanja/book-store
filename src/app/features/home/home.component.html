@@ -1,0 +1,55 @@
+<app-hero-banner />
+
+<!-- Search section -->
+<section class="home-search">
+  <div class="container">
+    <app-search-bar
+      placeholder="Search by title or author…"
+      (search)="onSearch($event)"
+    />
+  </div>
+</section>
+
+<!-- Featured books -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Featured Books</h2>
+      <a routerLink="/books" mat-stroked-button class="see-all-btn">
+        See All
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </div>
+
+    <div class="books-grid">
+      @for (book of featuredBooks(); track book.id) {
+        <app-book-card
+          [book]="book"
+          (addToCart)="onAddToCart($event)"
+        />
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Browse by category -->
+<section class="section section--surface">
+  <div class="container">
+    <h2 class="section-title">Browse by Category</h2>
+    <div class="categories-grid">
+      @for (cat of categoryCards; track cat.label) {
+        <button
+          class="category-card"
+          (click)="navigateToCategory(cat.label)"
+          [attr.aria-label]="'Browse ' + cat.label + ' books'"
+        >
+          <div class="category-card__icon" [style.background-color]="cat.color + '1a'" [style.color]="cat.color">
+            <mat-icon>{{ cat.icon }}</mat-icon>
+          </div>
+          <span class="category-card__label">{{ cat.label }}</span>
+          <mat-icon class="category-card__arrow">chevron_right</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+</section>

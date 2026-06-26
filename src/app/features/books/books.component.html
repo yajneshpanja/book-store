@@ -1,0 +1,58 @@
+<div class="page-content">
+  <div class="container">
+
+    <!-- Page header -->
+    <div class="books-header">
+      <h1 class="books-title">
+        @if (selectedCategory()) {
+          {{ selectedCategory() }}
+        } @else {
+          All Books
+        }
+        <span class="books-count">({{ filteredBooks().length }})</span>
+      </h1>
+    </div>
+
+    <!-- Search + Filter toolbar -->
+    <div class="books-toolbar">
+      <app-search-bar
+        [initialValue]="searchQuery()"
+        (search)="onSearch($event)"
+      />
+      <app-category-filter
+        [selected]="selectedCategory()"
+        (categoryChange)="onCategoryChange($event)"
+      />
+    </div>
+
+    <!-- Results grid -->
+    @if (pagedBooks().length > 0) {
+      <div class="books-grid">
+        @for (book of pagedBooks(); track book.id) {
+          <app-book-card
+            [book]="book"
+            (addToCart)="onAddToCart($event)"
+          />
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <p class="empty-state__title">No books found</p>
+        <p class="empty-state__subtitle">Try adjusting your search or category filter.</p>
+      </div>
+    }
+
+    <!-- Pagination -->
+    @if (filteredBooks().length > pageSize()) {
+      <mat-paginator
+        [length]="filteredBooks().length"
+        [pageSize]="pageSize()"
+        [pageIndex]="pageIndex()"
+        [pageSizeOptions]="[8, 12, 24]"
+        (page)="onPage($event)"
+        aria-label="Book list pages"
+      />
+    }
+
+  </div>
+</div>
