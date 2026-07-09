@@ -24,6 +24,17 @@
           <span class="drawer-badge">{{ cartCount() }}</span>
         }
       </a>
+      @if (isLoggedIn()) {
+        <button mat-button class="drawer-link drawer-logout" (click)="onLogout()">
+          <mat-icon>logout</mat-icon>
+          Sign out
+        </button>
+      } @else {
+        <a routerLink="/login" routerLinkActive="active" class="drawer-link">
+          <mat-icon>login</mat-icon>
+          Sign in
+        </a>
+      }
     </nav>
   </mat-sidenav>
 
@@ -71,6 +82,33 @@
           </button>
         </mat-form-field>
       </div>
+
+      <!-- Auth button (desktop) -->
+      @if (isLoggedIn()) {
+        <div class="user-chip desktop-only">
+          <mat-icon class="user-chip-icon">account_circle</mat-icon>
+          <span class="user-chip-name">{{ currentUser()?.name }}</span>
+          <button
+            mat-icon-button
+            class="logout-btn"
+            (click)="onLogout()"
+            matTooltip="Sign out"
+            aria-label="Sign out"
+          >
+            <mat-icon>logout</mat-icon>
+          </button>
+        </div>
+      } @else {
+        <a
+          routerLink="/login"
+          mat-stroked-button
+          class="login-btn desktop-only"
+          aria-label="Sign in"
+        >
+          <mat-icon>login</mat-icon>
+          Sign in
+        </a>
+      }
 
       <!-- Cart icon -->
       <a

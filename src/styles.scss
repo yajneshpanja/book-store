@@ -150,6 +150,17 @@ a {
   }
 }
 
+// Snackbar warning — used when login is required
+.snack-warn {
+  .mdc-snackbar__surface {
+    background-color: #7c3d00 !important;
+  }
+  .mat-mdc-snack-bar-action {
+    color: #fbbf24 !important;
+    font-weight: 600;
+  }
+}
+
 // Global focus-visible outline for accessibility
 :focus-visible {
   outline: 2px solid var(--color-primary);

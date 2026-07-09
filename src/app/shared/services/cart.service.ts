@@ -1,18 +1,31 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { Book } from '../models/book.model';
 import { CartItem } from '../models/cart-item.model';
+import {
+  ApiResponse,
+  CartResponse,
+  CartValidateResponse,
+  OrderResponse,
+} from '../models/api.model';
+import { AuthService } from './auth.service';
+
+const BASE = environment.apiUrl;
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  /** Reactive cart state */
+  private http        = inject(HttpClient);
+  private authService = inject(AuthService);
+
+  // ── Local Signal state (kept in sync with server after every mutation) ──────
   readonly cartItems = signal<CartItem[]>([]);
 
-  /** Total number of individual items in the cart */
   readonly itemCount = computed<number>(() =>
     this.cartItems().reduce((sum, item) => sum + item.quantity, 0)
   );
 
-  /** Subtotal price across all cart items */
   readonly totalPrice = computed<number>(() =>
     this.cartItems().reduce(
       (sum, item) => sum + item.book.price * item.quantity,
@@ -20,55 +33,183 @@ export class CartService {
     )
   );
 
-  /** Shipping: free over $50, otherwise flat $4.99 */
   readonly shippingCost = computed<number>(() =>
     this.totalPrice() >= 50 ? 0 : 4.99
   );
 
-  /** Grand total including shipping */
   readonly grandTotal = computed<number>(() =>
     this.totalPrice() + this.shippingCost()
   );
 
-  /** Add a book to the cart. If it already exists, increment quantity by 1. */
-  addToCart(book: Book): void {
-    const current = this.cartItems();
-    const existing = current.find((item) => item.book.id === book.id);
-    if (existing) {
-      this.cartItems.set(
-        current.map((item) =>
-          item.book.id === book.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      );
-    } else {
-      this.cartItems.set([...current, { book, quantity: 1 }]);
-    }
+  // ── HTTP header helper ───────────────────────────────────────────────────────
+  /**
+   * Build headers with the JWT Bearer token.
+   * Every cart request is now authenticated.
+   */
+  private headers(): HttpHeaders {
+    const token = this.authService.token();
+    return token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : new HttpHeaders();
   }
 
-  /** Remove a book from the cart entirely. */
-  removeFromCart(bookId: number): void {
-    this.cartItems.set(
-      this.cartItems().filter((item) => item.book.id !== bookId)
-    );
+  /**
+   * Map server CartResponse items → local CartItem[] Signal shape.
+   */
+  private applyServerCart(response: CartResponse): void {
+    const items: CartItem[] = response.items.map((si) => ({
+      book:     si.book,
+      quantity: si.quantity,
+    }));
+    this.cartItems.set(items);
   }
 
-  /** Update quantity for an item. Removes item if qty drops to 0. */
-  updateQuantity(bookId: number, quantity: number): void {
-    if (quantity <= 0) {
-      this.removeFromCart(bookId);
+  // ── Initialisation ───────────────────────────────────────────────────────────
+
+  /**
+   * Load the cart from the server.
+   * Called after login (and optionally on app start when already logged in).
+   * Silently ignores errors — UI still works with local state.
+   */
+  async loadCart(): Promise<void> {
+    if (!this.authService.isLoggedIn()) {
+      this.cartItems.set([]);
       return;
     }
-    this.cartItems.set(
-      this.cartItems().map((item) =>
-        item.book.id === bookId ? { ...item, quantity } : item
-      )
-    );
+    try {
+      const res = await firstValueFrom(
+        this.http.get<ApiResponse<CartResponse>>(`${BASE}/cart`, {
+          headers: this.headers(),
+        })
+      );
+      this.applyServerCart(res.data);
+    } catch {
+      // Network error — cart stays empty locally
+    }
   }
 
-  /** Clear the entire cart (used after placing an order). */
-  clearCart(): void {
+  /**
+   * Clear the local cart signal (called on logout — no server call needed
+   * because the server cart persists for next login).
+   */
+  clearLocalCart(): void {
     this.cartItems.set([]);
+  }
+
+  // ── CRUD operations ──────────────────────────────────────────────────────────
+
+  async addToCart(book: Book): Promise<void> {
+    if (!this.authService.isLoggedIn()) return;
+    try {
+      const res = await firstValueFrom(
+        this.http.post<ApiResponse<CartResponse>>(
+          `${BASE}/cart/items`,
+          { bookId: book.id, quantity: 1 },
+          { headers: this.headers() }
+        )
+      );
+      this.applyServerCart(res.data);
+    } catch {
+      // Optimistic fallback
+      const current  = this.cartItems();
+      const existing = current.find((i) => i.book.id === book.id);
+      if (existing) {
+        this.cartItems.set(
+          current.map((i) =>
+            i.book.id === book.id ? { ...i, quantity: i.quantity + 1 } : i
+          )
+        );
+      } else {
+        this.cartItems.set([...current, { book, quantity: 1 }]);
+      }
+    }
+  }
+
+  async removeFromCart(bookId: number): Promise<void> {
+    if (!this.authService.isLoggedIn()) return;
+    try {
+      const res = await firstValueFrom(
+        this.http.delete<ApiResponse<CartResponse>>(
+          `${BASE}/cart/items/${bookId}`,
+          { headers: this.headers() }
+        )
+      );
+      this.applyServerCart(res.data);
+    } catch {
+      this.cartItems.set(this.cartItems().filter((i) => i.book.id !== bookId));
+    }
+  }
+
+  async updateQuantity(bookId: number, quantity: number): Promise<void> {
+    if (quantity <= 0) return this.removeFromCart(bookId);
+    if (!this.authService.isLoggedIn()) return;
+    try {
+      const res = await firstValueFrom(
+        this.http.put<ApiResponse<CartResponse>>(
+          `${BASE}/cart/items/${bookId}`,
+          { quantity },
+          { headers: this.headers() }
+        )
+      );
+      this.applyServerCart(res.data);
+    } catch {
+      this.cartItems.set(
+        this.cartItems().map((i) =>
+          i.book.id === bookId ? { ...i, quantity } : i
+        )
+      );
+    }
+  }
+
+  async clearCart(): Promise<void> {
+    if (!this.authService.isLoggedIn()) {
+      this.cartItems.set([]);
+      return;
+    }
+    try {
+      await firstValueFrom(
+        this.http.delete<ApiResponse<CartResponse>>(`${BASE}/cart`, {
+          headers: this.headers(),
+        })
+      );
+    } catch {
+      // Ignore — still clear locally
+    } finally {
+      this.cartItems.set([]);
+    }
+  }
+
+  // ── Price validation ─────────────────────────────────────────────────────────
+
+  async validateCart(): Promise<CartValidateResponse> {
+    const items = this.cartItems().map((i) => ({
+      bookId:   i.book.id,
+      quantity: i.quantity,
+    }));
+    const res = await firstValueFrom(
+      this.http.post<ApiResponse<CartValidateResponse>>(
+        `${BASE}/cart/validate`,
+        { items },
+        { headers: this.headers() }
+      )
+    );
+    return res.data;
+  }
+
+  // ── Order placement ──────────────────────────────────────────────────────────
+
+  async placeOrder(customerName?: string, customerEmail?: string): Promise<OrderResponse> {
+    const items = this.cartItems().map((i) => ({
+      bookId:   i.book.id,
+      quantity: i.quantity,
+    }));
+    const res = await firstValueFrom(
+      this.http.post<ApiResponse<OrderResponse>>(
+        `${BASE}/orders`,
+        { items, customerName, customerEmail },
+        { headers: this.headers() }
+      )
+    );
+    return res.data;
   }
 }

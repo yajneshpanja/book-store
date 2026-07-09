@@ -130,6 +130,99 @@ $tablet: 1023px;
   }
 }
 
+// ── Login button (desktop) ────────────────────────────────────────────────────
+.login-btn {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  margin-right: 4px;
+
+  mat-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+// ── Logged-in user chip (desktop) ─────────────────────────────────────────────
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  // left padding for text; right side is flush with the icon button circle
+  padding: 0 2px 0 10px;
+  height: 36px;
+  margin-right: 4px;
+  max-width: 220px;
+
+  .user-chip-icon {
+    font-size: 1.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: rgba(255, 255, 255, 0.85);
+    flex-shrink: 0;
+    // vertically center the icon glyph
+    display: flex;
+    align-items: center;
+  }
+
+  .user-chip-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+    // keep text vertically centred inside the chip height
+    line-height: 36px;
+  }
+
+  // The Angular Material icon-button is 40×40 by default; shrink it to fit
+  // snugly inside the 36px chip without overflowing
+  .logout-btn.mat-mdc-icon-button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.8);
+
+    // Centre the icon glyph inside the smaller button
+    .mat-mdc-button-touch-target {
+      width: 32px;
+      height: 32px;
+    }
+
+    mat-icon {
+      font-size: 1.1rem;
+      width: 1.1rem;
+      height: 1.1rem;
+      line-height: 1;
+    }
+  }
+}
+
+// ── Drawer logout button ──────────────────────────────────────────────────────
+.drawer-logout {
+  width: 100%;
+  justify-content: flex-start;
+  font-size: 1rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  mat-icon {
+    color: var(--color-muted);
+  }
+}
+
 // ── Cart icon button ──────────────────────────────────────────────────────────
 .cart-btn {
   color: #fff;

@@ -15,10 +15,13 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { CartService } from '../../../shared/services/cart.service';
+import { AuthService } from '../../../shared/services/auth.service';
+
 
 @Component({
   selector: 'app-navbar',
@@ -34,18 +37,22 @@ import { CartService } from '../../../shared/services/cart.service';
     MatBadgeModule,
     MatFormFieldModule,
     MatInputModule,
+    MatTooltipModule,
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  private router = inject(Router);
+  private router      = inject(Router);
   private cartService = inject(CartService);
+  readonly authService = inject(AuthService);
 
   @ViewChild('drawer') drawer!: MatSidenav;
 
   /** Reactive cart item count from CartService */
-  readonly cartCount = computed(() => this.cartService.itemCount());
+  readonly cartCount   = computed(() => this.cartService.itemCount());
+  readonly isLoggedIn  = computed(() => this.authService.isLoggedIn());
+  readonly currentUser = computed(() => this.authService.currentUser());
 
   searchQuery = '';
   private routerSub!: Subscription;
@@ -67,5 +74,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.router.navigate(['/books'], { queryParams: { q } });
       this.searchQuery = '';
     }
+  }
+
+  onLogout(): void {
+    this.cartService.clearLocalCart();
+    this.authService.logout();
   }
 }

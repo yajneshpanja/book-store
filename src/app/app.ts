@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './core/layout/navbar/navbar.component';
 import { FooterComponent } from './core/layout/footer/footer.component';
+import { CartService } from './shared/services/cart.service';
 
 @Component({
   selector: 'app-root',
@@ -31,4 +32,11 @@ import { FooterComponent } from './core/layout/footer/footer.component';
     }
   `],
 })
-export class AppComponent {}
+export class AppComponent implements OnInit {
+  private cartService = inject(CartService);
+
+  ngOnInit(): void {
+    // Restore cart for users who are already logged in (token in localStorage)
+    this.cartService.loadCart();
+  }
+}

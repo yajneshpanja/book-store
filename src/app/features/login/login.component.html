@@ -1,0 +1,81 @@
+<div class="login-page">
+  <mat-card class="login-card">
+    <mat-card-header class="login-header">
+      <mat-icon class="login-logo">menu_book</mat-icon>
+      <mat-card-title>Welcome back</mat-card-title>
+      <mat-card-subtitle>Sign in to your Bookstore account</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Error banner -->
+      @if (error()) {
+        <div class="error-banner" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm" novalidate>
+        <!-- Email -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email address</mat-label>
+          <input
+            matInput
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            required
+            email
+            autocomplete="email"
+            placeholder="you@example.com"
+            [disabled]="loading()"
+          />
+          <mat-icon matPrefix>email</mat-icon>
+        </mat-form-field>
+
+        <!-- Password -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            name="password"
+            [(ngModel)]="password"
+            required
+            minlength="6"
+            autocomplete="current-password"
+            [disabled]="loading()"
+          />
+          <mat-icon matPrefix>lock</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword.set(!hidePassword())"
+            [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!-- Submit -->
+        <button
+          mat-flat-button
+          color="primary"
+          class="submit-btn"
+          type="submit"
+          [disabled]="loading() || !email || !password"
+        >
+          @if (loading()) {
+            <mat-spinner diameter="20" class="btn-spinner" />
+            Signing in…
+          } @else {
+            Sign in
+          }
+        </button>
+      </form>
+    </mat-card-content>
+
+    
+  </mat-card>
+</div>

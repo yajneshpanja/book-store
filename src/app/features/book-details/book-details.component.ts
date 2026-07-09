@@ -7,6 +7,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BookService } from '../../shared/services/book.service';
 import { CartService } from '../../shared/services/cart.service';
+import { AuthGuardService } from '../../shared/services/auth-guard.service';
 import { Book } from '../../shared/models/book.model';
 import { BookCardComponent } from '../../shared/components/book-card/book-card.component';
 
@@ -26,20 +27,24 @@ import { BookCardComponent } from '../../shared/components/book-card/book-card.c
   styleUrl: './book-details.component.scss',
 })
 export class BookDetailsComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  private route       = inject(ActivatedRoute);
+  private router      = inject(Router);
   private bookService = inject(BookService);
   private cartService = inject(CartService);
-  private snackBar = inject(MatSnackBar);
+  private snackBar    = inject(MatSnackBar);
+  private authGuard   = inject(AuthGuardService);
 
-  readonly book = signal<Book | undefined>(undefined);
-  readonly relatedBooks = computed<Book[]>(() =>
-    this.book() ? this.bookService.getRelated(this.book()!.id) : []
-  );
+  readonly book         = signal<Book | undefined>(undefined);
+  readonly relatedBooks = signal<Book[]>([]);
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.book.set(this.bookService.getBook(id));
+    const book = await this.bookService.getBook(id);
+    this.book.set(book);
+    if (book) {
+      const related = await this.bookService.getRelated(id);
+      this.relatedBooks.set(related);
+    }
   }
 
   get starIcons(): string[] {
@@ -55,6 +60,7 @@ export class BookDetailsComponent implements OnInit {
   }
 
   addToCart(): void {
+    if (!this.authGuard.requireLogin()) return;
     const b = this.book();
     if (!b) return;
     this.cartService.addToCart(b);
@@ -65,6 +71,7 @@ export class BookDetailsComponent implements OnInit {
   }
 
   onRelatedAddToCart(book: Book): void {
+    if (!this.authGuard.requireLogin()) return;
     this.cartService.addToCart(book);
     this.snackBar.open(`"${book.title}" added to cart`, 'Dismiss', { duration: 2500 });
   }

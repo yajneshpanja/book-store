@@ -1,9 +1,10 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { BookService } from '../../shared/services/book.service';
 import { CartService } from '../../shared/services/cart.service';
+import { AuthGuardService } from '../../shared/services/auth-guard.service';
 import { Book, Category } from '../../shared/models/book.model';
 import { HeroBannerComponent } from '../../shared/components/hero-banner/hero-banner.component';
 import { SearchBarComponent } from '../../shared/components/search-bar/search-bar.component';
@@ -29,12 +30,15 @@ interface CategoryCard {
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
-export class HomeComponent {
-  private router = inject(Router);
-  private bookService = inject(BookService);
-  private cartService = inject(CartService);
+export class HomeComponent implements OnInit {
+  private router         = inject(Router);
+  private bookService    = inject(BookService);
+  private cartService    = inject(CartService);
+  private authGuard      = inject(AuthGuardService);
 
-  readonly featuredBooks = computed(() => this.bookService.getFeatured());
+  /** Featured books — loaded from API on init */
+  readonly featuredBooks = signal<Book[]>([]);
+  readonly loadingFeatured = signal(false);
 
   readonly categoryCards: CategoryCard[] = [
     { label: 'Fiction',     icon: 'auto_stories',  color: '#6366f1' },
@@ -45,6 +49,18 @@ export class HomeComponent {
     { label: 'Biography',   icon: 'person',        color: '#ec4899' },
   ];
 
+  async ngOnInit(): Promise<void> {
+    this.loadingFeatured.set(true);
+    try {
+      const books = await this.bookService.getFeatured();
+      this.featuredBooks.set(books);
+    } catch {
+      // Featured section silently hides on error
+    } finally {
+      this.loadingFeatured.set(false);
+    }
+  }
+
   onSearch(query: string): void {
     if (query.trim()) {
       this.router.navigate(['/books'], { queryParams: { q: query } });
@@ -52,6 +68,7 @@ export class HomeComponent {
   }
 
   onAddToCart(book: Book): void {
+    if (!this.authGuard.requireLogin()) return;
     this.cartService.addToCart(book);
   }
 

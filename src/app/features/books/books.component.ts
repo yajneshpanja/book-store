@@ -11,6 +11,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
 import { BookService } from '../../shared/services/book.service';
 import { CartService } from '../../shared/services/cart.service';
+import { AuthGuardService } from '../../shared/services/auth-guard.service';
 import { Book, Category } from '../../shared/models/book.model';
 import { SearchBarComponent } from '../../shared/components/search-bar/search-bar.component';
 import { CategoryFilterComponent } from '../../shared/components/category-filter/category-filter.component';
@@ -31,27 +32,31 @@ const PAGE_SIZE = 8;
   styleUrl: './books.component.scss',
 })
 export class BooksComponent implements OnInit, OnDestroy {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  private route       = inject(ActivatedRoute);
+  private router      = inject(Router);
   private bookService = inject(BookService);
   private cartService = inject(CartService);
+  private authGuard   = inject(AuthGuardService);
 
   readonly categories = this.bookService.categories;
 
-  // Filter state
-  readonly searchQuery = signal('');
+  // Filter state — driven by query params
+  readonly searchQuery    = signal('');
   readonly selectedCategory = signal<Category | ''>('');
 
-  // Pagination
+  // Pagination — local state
   readonly pageIndex = signal(0);
-  readonly pageSize = signal(PAGE_SIZE);
+  readonly pageSize  = signal(PAGE_SIZE);
 
-  /** All books matching current filters */
+  // Server-side total (from API pagination envelope)
+  readonly totalBooks = signal(0);
+
+  /** In-memory filtered books from the BookService signal (updated after each API call) */
   readonly filteredBooks = computed(() =>
     this.bookService.searchBooks(this.searchQuery(), this.selectedCategory())
   );
 
-  /** Current page slice */
+  /** Current page slice of in-memory books */
   readonly pagedBooks = computed(() => {
     const start = this.pageIndex() * this.pageSize();
     return this.filteredBooks().slice(start, start + this.pageSize());
@@ -64,11 +69,27 @@ export class BooksComponent implements OnInit, OnDestroy {
       this.searchQuery.set(params['q'] ?? '');
       this.selectedCategory.set((params['category'] as Category) ?? '');
       this.pageIndex.set(0);
+      // Fetch from API whenever query params change
+      this.loadBooks();
     });
   }
 
   ngOnDestroy(): void {
     this.querySub?.unsubscribe();
+  }
+
+  private async loadBooks(): Promise<void> {
+    try {
+      const result = await this.bookService.fetchBooks({
+        q:        this.searchQuery(),
+        category: this.selectedCategory(),
+        page:     this.pageIndex() + 1,  // API is 1-based
+        limit:    this.pageSize(),
+      });
+      this.totalBooks.set(result.pagination.total);
+    } catch {
+      // BookService.error signal holds the message; grid shows empty state
+    }
   }
 
   onSearch(query: string): void {
@@ -89,9 +110,11 @@ export class BooksComponent implements OnInit, OnDestroy {
     this.pageIndex.set(event.pageIndex);
     this.pageSize.set(event.pageSize);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.loadBooks();
   }
 
   onAddToCart(book: Book): void {
+    if (!this.authGuard.requireLogin()) return;
     this.cartService.addToCart(book);
   }
 }

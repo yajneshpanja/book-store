@@ -5,6 +5,8 @@
 
       <div class="checkout-layout">
         <mat-card class="checkout-card">
+
+          <!-- ── Card header ───────────────────────────────────────────────── -->
           <mat-card-header>
             <mat-card-title>
               <mat-icon class="checkout-icon">shopping_bag</mat-icon>
@@ -16,7 +18,35 @@
           </mat-card-header>
 
           <mat-card-content>
-            <!-- Item list -->
+
+            <!-- ── Validation loading skeleton ──────────────────────────── -->
+            @if (validating()) {
+              <div class="validation-loading">
+                <mat-spinner diameter="28" />
+                <span>Verifying prices with server…</span>
+              </div>
+            }
+
+            <!-- ── Validation error banner ───────────────────────────────── -->
+            @if (validationError()) {
+              <div class="validation-banner validation-banner--warn">
+                <mat-icon class="banner-icon">warning_amber</mat-icon>
+                <span>{{ validationError() }}</span>
+                <button mat-stroked-button class="retry-btn" (click)="runValidation()">
+                  Retry
+                </button>
+              </div>
+            }
+
+            <!-- ── Price-changed banner ──────────────────────────────────── -->
+            @if (!validating() && hasPriceChange()) {
+              <div class="validation-banner validation-banner--info">
+                <mat-icon class="banner-icon">info</mat-icon>
+                <span>One or more prices have changed since you added items to your cart. Updated prices are shown below.</span>
+              </div>
+            }
+
+            <!-- ── Item list ─────────────────────────────────────────────── -->
             <div class="checkout-items">
               @for (item of cartItems(); track item.book.id) {
                 <div class="checkout-item">
@@ -28,10 +58,27 @@
                   <div class="checkout-item__info">
                     <span class="checkout-item__title">{{ item.book.title }}</span>
                     <span class="checkout-item__author">{{ item.book.author }}</span>
+
+                    <!-- Price change indicator -->
+                    @if (!validating() && isPriceChanged(item.book.id)) {
+                      <span class="price-changed-label">
+                        <mat-icon class="price-icon">trending_up</mat-icon>
+                        Price updated
+                      </span>
+                    }
                   </div>
+
                   <div class="checkout-item__qty">×{{ item.quantity }}</div>
-                  <div class="checkout-item__price">
-                    \${{ (item.book.price * item.quantity).toFixed(2) }}
+
+                  <div class="checkout-item__price"
+                       [class.price-changed]="!validating() && isPriceChanged(item.book.id)">
+                    <!-- Show validated (server) price if available, else local price -->
+                    {{ getValidatedPrice(item.book.id) * item.quantity | currency }}
+                    @if (!validating() && isPriceChanged(item.book.id)) {
+                      <span class="price-was">
+                        was {{ item.book.price * item.quantity | currency }}
+                      </span>
+                    }
                   </div>
                 </div>
               }
@@ -39,19 +86,19 @@
 
             <mat-divider class="checkout-divider" />
 
-            <!-- Totals -->
+            <!-- ── Totals (server-validated once available) ──────────────── -->
             <div class="checkout-totals">
               <div class="total-row">
                 <span>Subtotal</span>
-                <span>\${{ totalPrice().toFixed(2) }}</span>
+                <span>{{ displaySubtotal() | currency }}</span>
               </div>
               <div class="total-row">
                 <span>Shipping</span>
                 <span>
-                  @if (shippingCost() === 0) {
+                  @if (displayShipping() === 0) {
                     <span class="free-tag">FREE</span>
                   } @else {
-                    \${{ shippingCost().toFixed(2) }}
+                    {{ displayShipping() | currency }}
                   }
                 </span>
               </div>
@@ -60,37 +107,66 @@
 
               <div class="total-row grand-total">
                 <span>Total</span>
-                <span>\${{ grandTotal().toFixed(2) }}</span>
+                <span>{{ displayTotal() | currency }}</span>
               </div>
             </div>
 
-            <!-- Notice -->
+            <!-- ── Validation status badge ───────────────────────────────── -->
+            <div class="validation-status">
+              @if (validating()) {
+                <span class="status-chip status-chip--pending">
+                  <mat-icon>hourglass_empty</mat-icon> Verifying…
+                </span>
+              } @else if (validatedItems()) {
+                <span class="status-chip status-chip--ok">
+                  <mat-icon>verified</mat-icon> Prices verified
+                </span>
+              } @else if (validationError()) {
+                <span class="status-chip status-chip--warn">
+                  <mat-icon>warning_amber</mat-icon> Not verified
+                </span>
+              }
+            </div>
+
+            <!-- ── Notice ────────────────────────────────────────────────── -->
             <p class="checkout-notice">
               <mat-icon class="notice-icon">info</mat-icon>
               This is a demo. No real payment will be processed.
             </p>
+
           </mat-card-content>
 
+          <!-- ── Actions ──────────────────────────────────────────────────── -->
           <mat-card-actions class="checkout-actions">
             <button
               mat-flat-button
               color="primary"
               class="place-order-btn"
               (click)="placeOrder()"
+              [disabled]="!canPlaceOrder()"
+              [attr.aria-busy]="placing()"
             >
-              <mat-icon>check_circle</mat-icon>
-              Place Order
+              @if (placing()) {
+                <mat-spinner diameter="18" class="btn-spinner" />
+                Placing order…
+              } @else {
+                <ng-container>
+                  <mat-icon>check_circle</mat-icon>
+                  Place Order
+                </ng-container>
+              }
             </button>
             <a routerLink="/cart" mat-stroked-button class="back-btn">
               <mat-icon>arrow_back</mat-icon>
               Back to Cart
             </a>
           </mat-card-actions>
+
         </mat-card>
       </div>
 
     } @else {
-      <!-- Empty cart redirect hint -->
+      <!-- Empty cart state -->
       <div class="empty-state">
         <mat-icon class="empty-icon">shopping_cart</mat-icon>
         <h2>Nothing to check out</h2>
